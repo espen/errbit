@@ -18,7 +18,7 @@ gem 'inherited_resources'
 gem 'SystemTimer', :platform => :ruby_18
 gem 'hoptoad_notifier', "~> 2.4"
 gem 'actionmailer_inline_css', "~> 1.3.0"
-gem 'heroku'
+gem 'heroku', "~> 2.8.4"
 
 platform :ruby do
   gem 'bson_ext', '~> 1.3.1'
