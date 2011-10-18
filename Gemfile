@@ -21,13 +21,16 @@ gem 'actionmailer_inline_css', "~> 1.3.0"
 gem 'heroku', "~> 2.8.4"
 
 platform :ruby do
-  gem 'bson_ext', '~> 1.3.1'
+  gem 'bson_ext', '~> 1.4.0'
 end
+
+gem 'ri_cal'
 
 group :development, :test do
   gem 'rspec-rails', '~> 2.6'
   gem 'webmock', :require => false
-  gem 'factory_girl_rails'
+  gem 'factory_girl', '~> 1.3.3'
+  gem 'factory_girl_rails', '~> 1.0.1'
   unless ENV['TRAVIS']
     gem 'ruby-debug', :platform => :mri_18
     gem 'ruby-debug19', :platform => :mri_19, :require => 'ruby-debug'

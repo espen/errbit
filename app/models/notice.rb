@@ -91,7 +91,7 @@ class Notice
   end
 
   def decrease_counter_cache
-    problem.inc(:notices_count, -1)
+    problem.inc(:notices_count, -1) if err
   end
 
   def unresolve_problem
@@ -100,7 +100,7 @@ class Notice
 
 
   def cache_attributes_on_problem
-    problem.cache_notice_attributes(self) if problem.notices_count == 1
+    problem.cache_notice_attributes(self)
   end
 
   def sanitize

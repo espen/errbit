@@ -2,6 +2,8 @@
 
 $(function() {
   
+  var currentTab = "summary";
+  
   function init() {
     
     activateTabbedPanels();
@@ -31,6 +33,18 @@ $(function() {
     $('input[type=submit][data-action]').click(function() {
       $(this).closest('form').attr('action', $(this).attr('data-action'));
     });
+    
+    $('.notice-pagination').each(function() {
+      $('.notice-pagination a').pjax('#content', { timeout: 2000});
+      $('#content').bind('pjax:start',  function() {
+	$('.notice-pagination-loader').css("visibility", "visible");
+        currentTab = $('.tab-bar ul li a.button.active').attr('rel');
+      });
+
+      $('#content').bind('pjax:end',  function() {
+        activateTabbedPanels();
+      });
+    });
   }
   
   function activateTabbedPanels() {
@@ -39,13 +53,13 @@ $(function() {
       var panel = $('#'+tab.attr('rel'));
       panel.addClass('panel');
       panel.find('h3').hide();
-    })
+    });
     
     $('.tab-bar a').click(function(){
       activateTab($(this));
       return(false);
     });
-    activateTab($('.tab-bar a').first());
+    activateTab($('.tab-bar ul li a.button[rel=' + currentTab + ']'));
   }
   
   function activateTab(tab) {
@@ -65,7 +79,7 @@ $(function() {
         var checkbox = $(this).find('input[name="problems[]"]');
         checkbox.attr('checked', !checkbox.is(':checked'));
       }
-    })
+    });
   }
   
   init();
