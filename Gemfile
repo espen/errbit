@@ -1,5 +1,7 @@
 source 'http://rubygems.org'
 
+gem 'heroku'
+
 gem 'rails', '3.0.10'
 gem 'nokogiri'
 gem 'mongoid', '2.1.2'
