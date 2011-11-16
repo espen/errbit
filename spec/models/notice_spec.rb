@@ -82,6 +82,36 @@ describe Notice do
     end
   end
 
+  describe "user agent string" do
+    it "should be parsed and human-readable" do
+      notice = Factory.build(:notice, :request => {'cgi-data' => {'HTTP_USER_AGENT' => 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_7; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16'}})
+      notice.user_agent_string.should == 'Chrome 10.0.648.204'
+    end
+
+    it "should be nil if HTTP_USER_AGENT is blank" do
+      notice = Factory.build(:notice)
+      notice.user_agent_string.should == "N/A"
+    end
+  end
+
+  describe "host" do
+    it "returns host if url is valid" do
+      notice = Factory.build(:notice, :request => {'url' => "http://example.com/resource/12"})
+      notice.host.should == 'example.com'
+    end
+    
+    it "returns 'N/A' when url is not valid" do
+      notice = Factory.build(:notice, :request => {'url' => "some string"})
+      notice.host.should == 'N/A'
+    end
+
+    it "returns 'N/A' when url is empty" do
+      notice = Factory.build(:notice, :request => {})
+      notice.host.should == 'N/A'
+    end
+
+  end
+
 
   describe "email notifications (configured individually for each app)" do
     custom_thresholds = [2, 4, 8, 16, 32, 64]
@@ -106,6 +136,24 @@ describe Notice do
     end
   end
 
+  describe "email notifications for a resolved issue" do
 
+    before do
+      Errbit::Config.per_app_email_at_notices = true
+      @app = Factory(:app_with_watcher, :email_at_notices => [1])
+      @err = Factory(:err, :problem => Factory(:problem, :app => @app, :notices_count => 100))
+    end
+
+    after do
+      Errbit::Config.per_app_email_at_notices = false
+    end
+
+    it "should send email notification after 1 notice since an error has been resolved" do
+      @err.problem.resolve!
+      Mailer.should_receive(:err_notification).
+        and_return(mock('email', :deliver => true))
+      Factory(:notice, :err => @err)
+    end
+  end
 end
 

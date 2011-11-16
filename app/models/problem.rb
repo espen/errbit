@@ -18,6 +18,10 @@ class Problem
   field :environment
   field :klass
   field :where
+  field :user_agents, :type => Hash, :default => {}
+  field :messages,    :type => Hash, :default => {}
+  field :hosts,       :type => Hash, :default => {}
+  field :comments_count, :type => Integer, :default => 0
 
   index :app_id
   index :app_name
@@ -47,7 +51,7 @@ class Problem
   end
 
   def resolve!
-    self.update_attributes!(:resolved => true)
+    self.update_attributes!(:resolved => true, :notices_count => 0)
   end
 
   def unresolve!
@@ -123,8 +127,46 @@ class Problem
       :message => notice.message,
       :environment => notice.environment_name,
       :klass => notice.klass,
-      :where => notice.where) if notice
+      :where => notice.where,
+      :messages    => attribute_count_increase(:messages, notice.message),
+      :hosts       => attribute_count_increase(:hosts, notice.host),
+      :user_agents => attribute_count_increase(:user_agents, notice.user_agent_string)
+      ) if notice
     update_attributes!(attrs)
   end
+
+  def remove_cached_notice_attribures(notice)
+    update_attributes!(
+      :messages    => attribute_count_descrease(:messages, notice.message),
+      :hosts       => attribute_count_descrease(:hosts, notice.host),
+      :user_agents => attribute_count_descrease(:user_agents, notice.user_agent_string)
+    )
+  end
+
+  private
+    def attribute_count_increase(name, value)
+      counter, index = send(name), attribute_index(value)
+      if counter[index].nil?
+        counter[index] = {'value' => value, 'count' => 1}
+      else
+        counter[index]['count'] += 1
+      end
+      counter
+    end
+
+    def attribute_count_descrease(name, value)
+      counter, index = send(name), attribute_index(value)
+      if counter[index]['count'] > 1
+        counter[index]['count'] -= 1
+      else
+        counter.delete(index)
+      end
+      counter
+    end
+
+    def attribute_index(value)
+      Digest::MD5.hexdigest(value.to_s)
+    end
+
 end
 
