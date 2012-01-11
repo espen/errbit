@@ -81,7 +81,8 @@ class App
   end
 
   def find_or_create_err!(attrs)
-    Err.where(attrs).first || problems.create!.errs.create!(attrs)
+    Err.any_in(:problem_id => problems.map { |a| a.id }).
+        where(attrs).first || problems.create!.errs.create!(attrs)
   end
 
   # Mongoid Bug: find(id) on association proxies returns an Enumerator
@@ -123,7 +124,11 @@ class App
   end
 
   def notification_recipients
-    notify_all_users ? User.all.map(&:email).reject(&:blank?) : watchers.map(&:address)
+    if notify_all_users
+      (User.all.map(&:email).reject(&:blank?) + watchers.map(&:address)).uniq
+    else
+      watchers.map(&:address)
+    end
   end
 
   # Copy app attributes from another app.
