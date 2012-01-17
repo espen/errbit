@@ -39,6 +39,7 @@ end
 default_config = YAML.load_file(default_config_file)
 default_config.each do |k,v|
   Errbit::Config.send("#{k}=", v) if Errbit::Config.send(k) === nil
+  Errbit::Config.send("#{k}=", ENV["ERRBIT_#{k.upcase}"]) if ENV["ERRBIT_#{k.upcase}"] != nil
 end
 
 # Set SMTP settings if given.
