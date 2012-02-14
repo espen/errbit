@@ -114,7 +114,7 @@ class Problem
     if app
       self.app_name = app.name
       self.last_deploy_at = if (last_deploy = app.deploys.where(:environment => self.environment).last)
-        last_deploy.created_at
+        last_deploy.created_at.utc
       end
       collection.update({'_id' => self.id},
                         {'$set' => {'app_name' => self.app_name,
@@ -158,7 +158,7 @@ class Problem
 
     def attribute_count_descrease(name, value)
       counter, index = send(name), attribute_index(value)
-      if counter[index]['count'] > 1
+      if counter[index] && counter[index]['count'] > 1
         counter[index]['count'] -= 1
       else
         counter.delete(index)
