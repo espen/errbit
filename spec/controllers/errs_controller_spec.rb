@@ -114,7 +114,7 @@ describe ErrsController do
         errs = Kaminari.paginate_array((1..30).to_a)
         3.times { errs << Fabricate(:err).problem }
         3.times { errs << Fabricate(:err, :problem => Fabricate(:problem, :resolved => true)).problem }
-        Problem.should_receive(:ordered).and_return(
+        Problem.should_receive(:ordered_by).and_return(
           mock('proxy', :page => mock('other_proxy', :per => errs))
         )
         get :all
@@ -138,10 +138,6 @@ describe ErrsController do
   describe "GET /apps/:app_id/errs/:id" do
     render_views
 
-    before do
-      3.times { Fabricate(:notice, :err => err)}
-    end
-
     context 'when logged in as an admin' do
       before do
         sign_in Fabricate(:admin)
@@ -160,6 +156,26 @@ describe ErrsController do
       it "successfully render page" do
         get :show, :app_id => app.id, :id => err.problem.id
         response.should be_success
+      end
+
+      context 'pagination' do
+        let!(:notices) do
+          3.times.reduce([]) do |coll, i|
+            coll << Fabricate(:notice, :err => err, :created_at => (Time.now + i))
+          end
+        end
+
+        it "paginates the notices 1 at a time, starting with the most recent" do
+          get :show, :app_id => app.id, :id => err.problem.id
+          assigns(:notices).entries.count.should == 1
+          assigns(:notices).should include(notices.last)
+        end
+
+        it "paginates the notices 1 at a time, based on then notice param" do
+          get :show, :app_id => app.id, :id => err.problem.id, :notice => 3
+          assigns(:notices).entries.count.should == 1
+          assigns(:notices).should include(notices.first)
+        end
       end
 
       context "create issue button" do

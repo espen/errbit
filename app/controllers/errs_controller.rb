@@ -4,13 +4,10 @@ class ErrsController < ApplicationController
   before_filter :find_app, :except => [:index, :all, :destroy_several, :resolve_several, :unresolve_several, :merge_several, :unmerge_several]
   before_filter :find_problem, :except => [:index, :all, :destroy_several, :resolve_several, :unresolve_several, :merge_several, :unmerge_several]
   before_filter :find_selected_problems, :only => [:destroy_several, :resolve_several, :unresolve_several, :merge_several, :unmerge_several]
+  before_filter :set_sorting_params, :only => [:index, :all]
 
   def index
     app_scope = current_user.admin? ? App.all : current_user.apps
-
-    @sort = params[:sort]
-    @sort = "last_notice_at" unless %w{app message last_notice_at last_deploy_at count}.member?(@sort)
-    @order = params[:order] || "desc"
 
     @problems = Problem.for_apps(app_scope).in_env(params[:environment]).unresolved.ordered_by(@sort, @order)
     @selected_problems = params[:problems] || []
@@ -24,14 +21,12 @@ class ErrsController < ApplicationController
 
   def all
     app_scope = current_user.admin? ? App.all : current_user.apps
-    @problems = Problem.for_apps(app_scope).ordered.page(params[:page]).per(current_user.per_page)
+    @problems = Problem.for_apps(app_scope).ordered_by(@sort, @order).page(params[:page]).per(current_user.per_page)
     @selected_problems = params[:problems] || []
   end
 
   def show
-    page      = (params[:notice] || @problem.notices_count)
-    page      = 1 if page.to_i.zero?
-    @notices  = @problem.notices.page(page.to_i).per(1)
+    @notices  = @problem.notices.reverse_ordered.page(params[:notice]).per(1)
     @notice   = @notices.first
     @comment = Comment.new
     if request.headers['X-PJAX']
@@ -158,6 +153,12 @@ class ErrsController < ApplicationController
       else
         @selected_problems = Array(Problem.find(err_ids))
       end
+    end
+
+    def set_sorting_params
+      @sort = params[:sort]
+      @sort = "last_notice_at" unless %w{app message last_notice_at last_deploy_at count}.member?(@sort)
+      @order = params[:order] || "desc"
     end
 end
 
