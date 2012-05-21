@@ -66,6 +66,11 @@ GEM
       libxml-ruby (~> 2.0)
     has_scope (0.5.1)
     hashie (1.0.0)
+    heroku (2.24.1)
+      launchy (>= 0.3.2)
+      netrc (~> 0.7.1)
+      rest-client (~> 1.6.1)
+      rubyzip
     hike (1.2.1)
     hoptoad_notifier (2.4.11)
       activesupport
@@ -82,6 +87,8 @@ GEM
       activesupport (>= 3.0.0)
       railties (>= 3.0.0)
     kgio (2.7.4)
+    launchy (2.1.0)
+      addressable (~> 2.2.6)
     libxml-ruby (2.3.2)
     lighthouse-api (2.0)
       activeresource (>= 3.0.0)
@@ -106,6 +113,7 @@ GEM
       railties (>= 3.0.0)
     multi_json (1.0.4)
     multipart-post (1.1.5)
+    netrc (0.7.1)
     nokogiri (1.5.2)
     octokit (0.6.4)
       addressable (~> 2.2.6)
@@ -182,6 +190,7 @@ GEM
       linecache (>= 0.3)
     ruby-fogbugz (0.1.1)
       crack
+    rubyzip (0.9.7)
     sprockets (2.1.3)
       hike (~> 1.2)
       rack (~> 1.0)
@@ -216,6 +225,7 @@ DEPENDENCIES
   email_spec
   fabrication (~> 1.3.0)
   haml
+  heroku
   hoptoad_notifier (~> 2.4)
   htmlentities (~> 4.3.0)
   inherited_resources

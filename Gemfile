@@ -51,3 +51,7 @@ group :heroku do
   gem 'unicorn'
 end
 
+group :development, :heroku do
+  gem 'heroku'
+end
+
