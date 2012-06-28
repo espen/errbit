@@ -6,6 +6,8 @@ class User
   devise *Errbit::Config.devise_modules
 
   field :email
+  field :github_login
+  field :github_oauth_token
   field :name
   field :admin, :type => Boolean, :default => false
   field :per_page, :type => Fixnum, :default => PER_PAGE
@@ -15,6 +17,7 @@ class User
   before_save :ensure_authentication_token
 
   validates_presence_of :name
+  validates_uniqueness_of :github_login, :allow_nil => true
 
   attr_protected :admin
 
@@ -35,6 +38,18 @@ class User
 
   def watching?(app)
     apps.all.include?(app)
+  end
+
+  def password_required?
+    github_login.present? ? false : super
+  end
+
+  def github_account?
+    github_login.present? && github_oauth_token.present?
+  end
+
+  def can_create_github_issues?
+    github_account? && Errbit::Config.github_access_scope.include?('repo')
   end
 
   protected
