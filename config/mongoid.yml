@@ -5,4 +5,4 @@
 # commit it to your repo, then push to heroku.
 
 production:
-  uri: <%= ENV['MONGOHQ_URL'] %>
+  uri: <%= ENV['MONGOLAB_URI'] %>
