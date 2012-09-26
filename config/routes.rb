@@ -4,6 +4,7 @@ Errbit::Application.routes.draw do
 
   # Hoptoad Notifier Routes
   match '/notifier_api/v2/notices' => 'notices#create'
+  match '/locate/:id' => 'notices#locate', :as => :locate
   match '/deploys.txt' => 'deploys#create'
 
   resources :notices,   :only => [:show]
@@ -36,9 +37,16 @@ Errbit::Application.routes.draw do
         delete :unlink_issue
       end
     end
-
+    
     resources :deploys, :only => [:index]
   end
+
+  namespace :api do
+    namespace :v1 do
+      resources :problems, :only => [:index], :defaults => { :format => 'json' }
+      resources :notices, :only => [:index], :defaults => { :format => 'json' }
+    end
+  end 
 
   root :to => 'apps#index'
 

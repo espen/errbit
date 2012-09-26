@@ -5,6 +5,7 @@ class App
   field :name, :type => String
   field :api_key
   field :github_repo
+  field :bitbucket_repo
   field :resolve_errs_on_deploy, :type => Boolean, :default => false
   field :notify_all_users, :type => Boolean, :default => false
   field :notify_on_errs, :type => Boolean, :default => true
@@ -17,6 +18,8 @@ class App
   embeds_many :watchers
   embeds_many :deploys
   embeds_one :issue_tracker
+  embeds_one :notification_service
+
   has_many :problems, :inverse_of => :app, :dependent => :destroy
 
   before_validation :generate_api_key, :on => :create
@@ -33,7 +36,8 @@ class App
     :reject_if => proc { |attrs| attrs[:user_id].blank? && attrs[:email].blank? }
   accepts_nested_attributes_for :issue_tracker, :allow_destroy => true,
     :reject_if => proc { |attrs| !IssueTracker.subclasses.map(&:to_s).include?(attrs[:type].to_s) }
-
+  accepts_nested_attributes_for :notification_service, :allow_destroy => true,
+    :reject_if => proc { |attrs| !NotificationService.subclasses.map(&:to_s).include?(attrs[:type].to_s) }
 
   # Processes a new error report.
   #
@@ -74,8 +78,7 @@ class App
   end
 
   def find_or_create_err!(attrs)
-    Err.any_in(:problem_id => problems.map { |a| a.id }).
-        where(attrs).first || problems.create!.errs.create!(attrs)
+    Err.where(:fingerprint => attrs[:fingerprint]).first || problems.create!.errs.create!(attrs)
   end
 
   # Mongoid Bug: find(id) on association proxies returns an Enumerator
@@ -116,10 +119,27 @@ class App
     "#{github_url}/blob/master#{file}"
   end
 
+  def bitbucket_repo?
+    self.bitbucket_repo.present?
+  end
+
+  def bitbucket_url
+    "https://bitbucket.org/#{bitbucket_repo}" if bitbucket_repo?
+  end
+
+  def bitbucket_url_to_file(file)
+    "#{bitbucket_url}/src/master#{file}"
+  end
+
 
   def issue_tracker_configured?
     !!(issue_tracker && issue_tracker.class < IssueTracker && issue_tracker.project_id.present?)
   end
+
+  def notification_service_configured?
+    !!(notification_service && notification_service.class < NotificationService && notification_service.api_token.present?)
+  end
+
 
   def notification_recipients
     if notify_all_users
@@ -137,7 +157,7 @@ class App
         self.send("#{k}=", copy_app.send(k))
       end
       # Clone the embedded objects that can be changed via apps/edit (ignore errs & deploys, etc.)
-      %w(watchers issue_tracker).each do |relation|
+      %w(watchers issue_tracker notification_service).each do |relation|
         if obj = copy_app.send(relation)
           self.send("#{relation}=", obj.is_a?(Array) ? obj.map(&:clone) : obj.clone)
         end
