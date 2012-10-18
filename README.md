@@ -1,7 +1,10 @@
-# Errbit [![TravisCI][travis-img-url]][travis-ci-url]
+# Errbit [![TravisCI][travis-img-url]][travis-ci-url] [![Code Climate][codeclimate-img-url]][codeclimate-url]
 
 [travis-img-url]: https://secure.travis-ci.org/errbit/errbit.png?branch=master
 [travis-ci-url]: http://travis-ci.org/errbit/errbit
+[codeclimate-img-url]: https://codeclimate.com/badge.png
+[codeclimate-url]: https://codeclimate.com/github/errbit/errbit
+
 
 ### The open source, self-hosted error catcher
 
@@ -359,6 +362,12 @@ card_type = Defect, status = Open, priority = Essential
 * For 'Account/Repository', the account will either be a username or organization. i.e. **errbit/errbit**
 * You will also need to provide your username and password for your GitHub account.
   * (We'd really appreciate it if you wanted to help us implement OAuth instead!)
+  
+**Bitbucket Issues Integration**
+
+* For 'BITBUCKET REPO' field, the account will either be a username or organization. i.e. **errbit/errbit**
+* You will also need to provide your username and password for your Bitbucket account.
+
 
 
 What if Errbit has an error?
@@ -396,6 +405,10 @@ Solutions known to work are listed below:
   <tr>
     <th>PHP (&gt;= 5.3)</th>
     <td>https://github.com/flippa/errbit-php</td>
+  </tr>
+  <tr>
+    <th>Python</th>
+    <td>https://github.com/mkorenkov/errbit.py , https://github.com/pulseenergy/airbrakepy</td>
   </tr>
 </table>
 
