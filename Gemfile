@@ -93,6 +93,9 @@ group :test do
   gem 'timecop'
 end
 
+group :heroku, :production do
+  gem 'unicorn'
+end
 
 # Use thin for development
 gem 'thin', :group => :development, :platform => :ruby
