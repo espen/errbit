@@ -93,7 +93,7 @@ group :test do
   gem 'timecop'
 end
 
-group :heroku, :production do
+group :heroku do
   gem 'unicorn'
 end
 
