@@ -199,6 +199,12 @@ heroku run rake db:seed
 heroku addons:add deployhooks:http --url="http://YOUR_ERRBIT_HOST/deploys.txt?api_key=YOUR_API_KEY"
 ```
 
+  * You may also want to configure a different secret token for each deploy:
+
+```bash
+heroku config:add SECRET_TOKEN=some-secret-token
+```
+
   * Enjoy!
 
 
@@ -387,9 +393,7 @@ card_type = Defect, status = Open, priority = Essential
 
 * Account is the host of your gitlab installation. i.e. **http://gitlab.example.com**
 * To authenticate, Errbit uses token-based authentication. Get your API Key in your user settings (or create special user for this purpose)
-* You also need to provide project name (shortname) or ID (number) for issues to be created
-* **Currently (as of 3.0), Gitlab has 2000 character limit for issue description.** It is necessary to turn it off at your instance, because Errbit issues body is much longer. Please comment validation line in issue model in models folder https://github.com/gitlabhq/gitlabhq/blob/master/app/models/issue.rb#L10
-
+* You also need to provide project ID (it needs to be Number) for issues to be created
 
 
 What if Errbit has an error?
