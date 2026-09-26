@@ -14,7 +14,7 @@ RSpec.describe NoticeFingerprinter, type: :model do
       expect(f_1).to eq(f_2)
     end
 
-    ["error_class", "message", "component", "action", "environment_name"].each do |i|
+    ["error_class", "message", "environment_name"].each do |i|
       it "affects the fingerprint when #{i} is false" do
         f_1 = fingerprinter.generate("123", notice, backtrace)
         f_2 = fingerprinter.generate("123", notice, backtrace)
@@ -24,6 +24,46 @@ RSpec.describe NoticeFingerprinter, type: :model do
 
         expect(f_1).to eq(f_2)
         expect(f_1).not_to eq(f_3)
+      end
+    end
+
+    ["component", "action"].each do |i|
+      it "affects the fingerprint when #{i} is false and there is no backtrace" do
+        f_1 = fingerprinter.generate("123", notice, nil)
+
+        fingerprinter.send(:"#{i}=", false)
+        f_2 = fingerprinter.generate("123", notice, nil)
+
+        expect(f_1).not_to eq(f_2)
+      end
+
+      it "does not affect the fingerprint when #{i} is false and there is a backtrace" do
+        f_1 = fingerprinter.generate("123", notice, backtrace)
+
+        fingerprinter.send(:"#{i}=", false)
+        f_2 = fingerprinter.generate("123", notice, backtrace)
+
+        expect(f_1).to eq(f_2)
+      end
+    end
+
+    context "two notices differing only in component/action with the same backtrace" do
+      let(:notice_2) do
+        create(:notice, request: {"component" => "other", "action" => "elsewhere"})
+      end
+
+      it "has the same fingerprint" do
+        f_1 = fingerprinter.generate("123", notice, backtrace)
+        f_2 = fingerprinter.generate("123", notice_2, backtrace)
+
+        expect(f_1).to eq(f_2)
+      end
+
+      it "has a different fingerprint when there is no backtrace" do
+        f_1 = fingerprinter.generate("123", notice, nil)
+        f_2 = fingerprinter.generate("123", notice_2, nil)
+
+        expect(f_1).not_to eq(f_2)
       end
     end
 

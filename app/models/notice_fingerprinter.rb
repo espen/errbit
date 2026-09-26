@@ -19,17 +19,22 @@ class NoticeFingerprinter
     material = [api_key]
     material << notice.error_class if error_class
     material << notice.filtered_message if message
-    material << notice.component if component
-    material << notice.action if action
     material << notice.environment_name if environment_name
 
     # Sometimes backtrace is nil
-    if backtrace
+    if backtrace&.lines.present?
       if backtrace_lines < 0
         material << backtrace.lines
       else
         material << backtrace.lines.slice(0, backtrace_lines)
       end
+    else
+      # Without a backtrace the request context is the only way to tell
+      # notices apart. When a backtrace is present it already identifies the
+      # raise site, and mixing in component/action would split errors raised
+      # outside controller code (e.g. middleware) into one problem per action.
+      material << notice.component if component
+      material << notice.action if action
     end
 
     Digest::MD5.hexdigest(material.join)
